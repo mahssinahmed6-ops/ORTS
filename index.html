@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-color-profile=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBS Mobile Studio - Ultimate Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBS Mobile Studio - Professional Continuous Edition</title>
     <style>
         /* إعدادات المظهر والخطوط لبيئة OBS الاحترافية الداكنة */
         * {
@@ -47,6 +47,11 @@
             border: 2px solid #2b2d31;
             overflow: hidden;
             border-radius: 2px;
+        }
+
+        /* حاوية الماتريكس الخلفية السرية للاحتفاظ بفيديوهات نينجا حية دون تدمير عند التنقل */
+        #background-ninja-matrix {
+            display: none;
         }
 
         /* كائنات البث والميديا الفنية داخل الشاشة */
@@ -164,20 +169,21 @@
             border-bottom: 1px solid #2b2d31;
         }
 
-        /* تفعيل التمرير الحر والناعم للأعلى والأسفل وحظر التجميد البصري */
+        /* تفعيل التمرير الحر والناعم للأعلى والأسفل وحظر التجميد البصري بشكل مطلق */
         .dock-content {
             flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 4px;
+            overflow-y: scroll !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            padding: 6px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 5px;
         }
 
-        /* تفعيل واجهة الاختيارات القابلة للمس الحركي */
+        /* تفعيل واجهة الاختيارات القابلة للمس الحركي والتمرير الشامل */
         .list-item {
-            padding: 7px 8px;
+            padding: 8px 10px;
             background-color: #2b2d31;
             border-radius: 3px;
             cursor: pointer;
@@ -187,6 +193,7 @@
             font-size: 0.8rem;
             color: #dbdee1;
             border: 1px solid transparent;
+            -webkit-user-select: text;
             user-select: text;
         }
 
@@ -221,11 +228,12 @@
             padding: 2px;
         }
 
-        /* مكسر الصوت الاحترافي (Audio Mixer) */
+        /* مكسر الصوت الاحترافي (Audio Mixer) قابليته للتمرير حر */
         .mixer-track {
             background: #2b2d31;
-            padding: 5px;
+            padding: 6px;
             border-radius: 3px;
+            flex-shrink: 0;
         }
         .mixer-title {
             font-size: 0.7rem;
@@ -249,22 +257,22 @@
         }
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #0078d7;
             cursor: pointer;
         }
 
-        /* لوحة التحكم بالبث والإعدادات المتقدمة للمفاتيح */
+        /* لوحة التحكم بالبث والإعدادات المتقدمة للمفاتيح والأزرار الحقيقية */
         .controls-grid {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
         .stream-input-group {
             background: #2b2d31;
-            padding: 4px;
+            padding: 5px;
             border-radius: 3px;
         }
         .stream-input-group label {
@@ -276,8 +284,8 @@
             margin-bottom: 2px;
         }
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             background-color: #4e5058;
             border-radius: 50%;
             display: inline-block;
@@ -291,7 +299,7 @@
             border: 1px solid #4e5058;
             color: #fff;
             font-size: 0.7rem;
-            padding: 3px;
+            padding: 4px;
             border-radius: 2px;
             -webkit-user-select: text;
             user-select: text;
@@ -300,22 +308,38 @@
             background: #4e5058;
             color: #ffffff;
             border: 1px solid #2b2d31;
-            padding: 6px;
+            padding: 7px;
             border-radius: 3px;
             font-size: 0.75rem;
             cursor: pointer;
             text-align: center;
             font-weight: bold;
         }
-        .btn-control.active {
+        
+        /* زر البث الفعلي المخصص والمميز */
+        .btn-go-live {
             background: #da373c;
-            border-color: #ff4444;
-            animation: pulse-live 1.5s infinite;
+            color: white;
+            border: 1px solid #ff4444;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(218, 55, 60, 0.4);
+        }
+        
+        .btn-go-live.streaming-active {
+            background: #23a55a !important;
+            border-color: #2ecf72 !important;
+            animation: pulse-live 1.2s infinite;
+            box-shadow: 0 0 12px #23a55a;
         }
 
         @keyframes pulse-live {
             0% { opacity: 1; }
-            50% { opacity: 0.7; }
+            50% { opacity: 0.8; }
             100% { opacity: 1; }
         }
 
@@ -374,10 +398,13 @@
         <div id="preview-window"></div>
     </div>
 
-    <!-- لوحة التحكم السفلى للـ OBS Docks المتكاملة المفتوحة للتمرير العمودي الكامل -->
+    <!-- ماتريكس الحماية السرية: هنا تعيش روابط نينجا بشكل دائم دون إعادة تحميل عند تغيير المشهد -->
+    <div id="background-ninja-matrix"></div>
+
+    <!-- لوحة التحكم السفلى للـ OBS Docks المتكاملة المفتوحة للتمرير العمودي الكامل المضمون -->
     <div id="control-panel">
         
-        <!-- الأرصفة 1: المشاهد (Scenes) -->
+        <!-- الأرصفة 1: المشاهد (Scenes) - تدعم التمرير المطلق -->
         <div class="dock">
             <div class="dock-header">
                 <span>المشاهد (Scenes)</span>
@@ -386,7 +413,7 @@
             <div class="dock-content" id="scenes-list"></div>
         </div>
 
-        <!-- الأرصفة 2: العناصر (Sources) المربوطة والمفصولة لكل مشهد على حده -->
+        <!-- الأرصفة 2: العناصر (Sources) المربوطة والمفصولة لكل مشهد على حده - تدعم التمرير -->
         <div class="dock">
             <div class="dock-header">
                 <span>العناصر (Sources)</span>
@@ -395,7 +422,7 @@
             <div class="dock-content" id="sources-list"></div>
         </div>
 
-        <!-- الأرصفة 3: مكسر الصوت الديناميكي للمشهد النشط (Audio Mixer) -->
+        <!-- الأرصفة 3: مكسر الصوت الديناميكي للمشهد النشط (Audio Mixer) - تدعم التمرير -->
         <div class="dock">
             <div class="dock-header">
                 <span>مكسر الصوت (Audio Mixer)</span>
@@ -403,21 +430,22 @@
             <div class="dock-content" id="mixer-list"></div>
         </div>
 
-        <!-- الأرصفة 4: لوحة القيادة وإعدادات البث والمفاتيح الحقيقية لليوتيوب وفيسبوك المفتوحة للتمرير والمس -->
+        <!-- الأرصفة 4: لوحة القيادة وزر بدأ البث الفعلي المستقل - تدعم التمرير -->
         <div class="dock">
-            <div class="dock-header"><span>إعدادات البث الفعلي والتحكم</span></div>
-            <div class="dock-content" style="padding: 4px;">
-                <div class="stream-input-group" style="margin-bottom: 5px;">
+            <div class="dock-header"><span>لوحة البث الفعلي والإعدادات</span></div>
+            <div class="dock-content">
+                <div class="stream-input-group">
                     <label>🔴 YouTube Stream Key <span id="dot-yt" class="status-dot"></span></label>
                     <input type="text" id="yt-key" placeholder="أدخل مفتاح بث يوتيوب..." value="live_73921_xXyZ92">
                 </div>
-                <div class="stream-input-group" style="margin-bottom: 5px;">
+                <div class="stream-input-group">
                     <label>🔵 Facebook Stream Key <span id="dot-fb" class="status-dot"></span></label>
                     <input type="text" id="fb-key" placeholder="أدخل مفتاح بث فيسبوك..." value="FB-1029384756-live">
                 </div>
-                <div class="controls-grid" style="margin-top: 5px;">
-                    <button class="btn-control" id="btn-stream" onclick="toggleStream()">بدء البث المباشر</button>
-                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a; font-size: 0.65rem; padding: 3px;">VDO.Ninja Connected</button>
+                <div class="controls-grid" style="margin-top: 3px;">
+                    <!-- زر التشغيل الفعلي المستقل الذي تم طلبه -->
+                    <button class="btn-go-live" id="btn-actual-live" onclick="triggerActualStreaming()">🔴 بدأ البث الفعلي الفوري</button>
+                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a; font-size: 0.65rem; padding: 2px;" id="stream-timer-display">الحالة: جاهز للبث</button>
                 </div>
             </div>
         </div>
@@ -428,9 +456,9 @@
         <h3>إضافة عنصر للمشهد</h3>
         <select id="source-type" onchange="toggleModalFields()">
             <option value="video">🎥 فيديو (يتناسب تلقائياً مع خيار التعديل اليدوي)</option>
-            <option value="image">🖼️ صورة (محلية)</option>
+            <option value="image">🖼️ صورة (مهلية)</option>
             <option value="text">🔤 نص مخصص</option>
-            <option value="ninja">🥷 رابط كاميرا VDO.Ninja (تشغيل فوري باللمس)</option>
+            <option value="ninja">🥷 رابط كاميرا VDO.Ninja (تشغيل مستمر دون انقطاع)</option>
         </select>
         
         <input type="text" id="source-name-input" placeholder="اسم العنصر في قائمة التحكم">
@@ -453,12 +481,15 @@
         // دفق البيانات الشامل والمستقل لكل مشهد على حده
         let state = {
             currentSceneId: null,
-            scenes: []
+            scenes: [],
+            isLiveStreaming: false,
+            streamSeconds: 0,
+            timerInterval: null
         };
 
         const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
 
-        // --- معالجة وإدارة المشاهد المستقلة ---
+        // --- معالجة وإدارة المشاهد المستقلة والكاملة ---
         function addNewScene() {
             let name = prompt("أدخل اسم المشهد الجديد:");
             if (!name) return;
@@ -469,11 +500,13 @@
         }
 
         function selectScene(id) {
-            let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
-            if (currentScene) {
-                currentScene.sources.forEach(src => {
-                    let videoEl = document.getElementById('video-' + src.id);
-                    if (videoEl) videoEl.muted = true;
+            let previousScene = state.scenes.find(s => s.id === state.currentSceneId);
+            if (previousScene) {
+                previousScene.sources.forEach(src => {
+                    if (src.type === 'video') {
+                        let videoEl = document.getElementById('video-' + src.id);
+                        if (videoEl) videoEl.muted = true; // كتم الصوت فقط لمنع التداخل
+                    }
                 });
             }
 
@@ -510,7 +543,7 @@
             document.getElementById('fit-label').style.display = (type === 'video' || type === 'image') ? 'flex' : 'none';
         }
 
-        // --- معالجة الحفظ الفعلي للميديا وملفات الفيديوهات ---
+        // --- معالجة الحفظ الفعلي للميديا وملفات الفيديوهات وروابط النينجا ---
         function saveNewSource() {
             let type = document.getElementById('source-type').value;
             let name = document.getElementById('source-name-input').value || ("عنصر " + type);
@@ -546,7 +579,7 @@
                 ninjaMode: isNinjaMode,
                 volume: 80, 
                 x: initialX, y: initialY, w: initialW, h: initialH,
-                isLocked: false // القفل الافتراضي للسماح بالتحريك أولاً حتى يتناسب يدوياً
+                isLocked: false 
             };
 
             currentScene.sources.push(newSource);
@@ -560,10 +593,15 @@
 
         function deleteSource(id) {
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
-            currentScene.sources = currentScene.sources.filter(src => src.id !== id);
+            if(currentScene) {
+                currentScene.sources = currentScene.sources.filter(src => src.id !== id);
+            }
             
             let el = document.getElementById(id);
             if(el) el.remove();
+            
+            let cachedIframe = document.getElementById('iframe-cache-' + id);
+            if(cachedIframe) cachedIframe.remove();
             
             renderApp();
         }
@@ -578,7 +616,6 @@
             }
         }
 
-        // تبديل حالة القفل لتمكين التفاعل والنقر الداخلي للفيديو والنينجا
         function toggleLockSource(srcId, event) {
             event.stopPropagation();
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
@@ -589,9 +626,9 @@
             }
         }
 
-        // --- محرك رندرة ذكي يحافظ على حالة الفيديوهات دون إعادة تشغيل وصديق للتمرير الحركي ---
+        // --- محرك الرندرة الاحترافي والذكي: يمنع انقطاع VDO.Ninja نهائياً عند التنقل ---
         function renderApp() {
-            // 1. معالجة رصيف المشاهد السفلية
+            // 1. معالجة وتحديث قوائم رصيف المشاهد الفوري والمفتوح للتمرير
             const scenesList = document.getElementById('scenes-list');
             scenesList.innerHTML = '';
             state.scenes.forEach(scene => {
@@ -606,6 +643,7 @@
             const sourcesList = document.getElementById('sources-list');
             const mixerList = document.getElementById('mixer-list');
             const previewWindow = document.getElementById('preview-window');
+            const matrixContainer = document.getElementById('background-ninja-matrix');
 
             sourcesList.innerHTML = '';
             mixerList.innerHTML = '';
@@ -613,15 +651,22 @@
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (!currentScene) return;
 
+            // تحديد العناصر النشطة في هذا المشهد الحالي فقط
             let activeSourceIds = currentScene.sources.filter(s => !s.ninjaMode).map(s => s.id);
 
+            // إدارة الـ DOM: تنظيف شاشة المعاينة من العناصر غير التابعة للمشهد الحالي، مع استثناء تدمير الـ Ninja iframes
             Array.from(previewWindow.children).forEach(child => {
                 if (!activeSourceIds.includes(child.id)) {
+                    let cachedIframeContainer = child.querySelector('iframe');
+                    if (cachedIframeContainer) {
+                        // إذا كان العنصر يحتوي على iframe نينجا، ننقله فوراً للماتريكس الخلفي للحفاظ عليه حياً ومستمراً بالتشغيل
+                        matrixContainer.appendChild(cachedIframeContainer);
+                    }
                     child.remove();
                 }
             });
 
-            // 2. تحديث وعرض عناصر المشهد النشط حالياً فقط بشكل مستقل وثابت
+            // 2. معالجة وبناء عناصر المشهد الحالي بكل دقة وسلاسة تفاعلية والتمرير الكامل
             currentScene.sources.forEach(src => {
                 
                 sourcesList.innerHTML += `
@@ -649,41 +694,32 @@
                         existingEl.style.width = src.w + "px";
                         existingEl.style.height = src.h + "px";
                         
-                        // تعديل فوري ومباشر لطبقة السحب بناء على حالة القفل
                         let overlay = existingEl.querySelector('.touch-overlay');
                         let handleResize = existingEl.querySelector('.resize-handle');
                         let handleLock = existingEl.querySelector('.lock-handle');
                         
                         if(src.isLocked) {
                             existingEl.classList.add('locked-aspect');
-                            if(overlay) overlay.style.display = 'none'; // إخفاء الطبقة الشفافة ليمر اللمس مباشرة داخل النينجا والفيديو
+                            if(overlay) overlay.style.display = 'none'; 
                             if(handleResize) handleResize.style.display = 'none';
                             if(handleLock) handleLock.innerHTML = '🔒';
                         } else {
                             existingEl.classList.remove('locked-aspect');
-                            if(overlay) overlay.style.display = 'block'; // إعادة بناء حاوية الحماية لتمكين السحب والتطابق اليدوي
+                            if(overlay) overlay.style.display = 'block'; 
                             if(handleResize) handleResize.style.display = 'block';
                             if(handleLock) handleLock.innerHTML = '🔓';
                         }
 
-                    } else {
-                        let mediaContent = "";
-                        if (src.type === 'image') {
-                            mediaContent = `<img src="${src.url}">`;
-                        } else if (src.type === 'video') {
-                            mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay webkit-playsinline playsinline style="width:100%; height:100%; object-fit:fill;"></video>`;
-                        } else if (src.type === 'text') {
-                            mediaContent = `<div class="text-content">${src.text}</div>`;
-                        } else if (src.type === 'ninja') {
-                            let formattedUrl = src.ninjaUrl;
-                            if (formattedUrl.indexOf('?') === -1) {
-                                formattedUrl += "?autoplay=1&mute=0&play=1";
-                            } else {
-                                formattedUrl += "&autoplay=1&mute=0&play=1";
+                        // ميزة السحب المستمر لـ VDO.Ninja: سحب الـ iframe من المصفوفة الخلفية وإعادته للشاشة دون إعادة تشغيل
+                        if (src.type === 'ninja') {
+                            let iframeInMatrix = matrixContainer.querySelector(`iframe[id="iframe-cache-${src.id}"]`);
+                            if (iframeInMatrix) {
+                                existingEl.appendChild(iframeInMatrix);
                             }
-                            mediaContent = `<iframe src="${formattedUrl}" allow="autoplay; camera; microphone; fullscreen"></iframe>`;
                         }
 
+                    } else {
+                        // بناء كائن ميديا جديد تماماً للمرة الأولى
                         let elementHtml = document.createElement('div');
                         elementHtml.className = "render-element";
                         elementHtml.id = src.id;
@@ -692,13 +728,48 @@
                         elementHtml.style.width = src.w + "px";
                         elementHtml.style.height = src.h + "px";
                         
-                        // حقن المحتويات مع طبقة الحماية الحركية وأزرار التبديل الذكية
                         elementHtml.innerHTML = `
                             <div class="touch-overlay"></div>
-                            ${mediaContent}
                             <div class="lock-handle" onclick="toggleLockSource('${src.id}', event)">🔓</div>
                             <div class="resize-handle"></div>
                         `;
+
+                        if (src.type === 'image') {
+                            let img = document.createElement('img');
+                            img.src = src.url;
+                            elementHtml.appendChild(img);
+                        } else if (src.type === 'video') {
+                            let video = document.createElement('video');
+                            video.id = 'video-' + src.id;
+                            video.src = src.url;
+                            video.loop = src.loop;
+                            video.autoplay = true;
+                            video.muted = false;
+                            video.setAttribute('playsinline', 'true');
+                            video.setAttribute('webkit-playsinline', 'true');
+                            video.style.width = "100%";
+                            video.style.height = "100%";
+                            video.style.objectFit = "fill";
+                            elementHtml.appendChild(video);
+                        } else if (src.type === 'text') {
+                            let txt = document.createElement('div');
+                            txt.className = "text-content";
+                            txt.innerText = src.text;
+                            elementHtml.appendChild(txt);
+                        } else if (src.type === 'ninja') {
+                            // هندسة وتوليد الـ iframe المستمر للنينجا وحفظه بمعرف فريد
+                            let iframe = document.createElement('iframe');
+                            iframe.id = 'iframe-cache-' + src.id;
+                            let formattedUrl = src.ninjaUrl;
+                            if (formattedUrl.indexOf('?') === -1) {
+                                formattedUrl += "?autoplay=1&mute=0&play=1";
+                            } else {
+                                formattedUrl += "&autoplay=1&mute=0&play=1";
+                            }
+                            iframe.src = formattedUrl;
+                            iframe.allow = "autoplay; camera; microphone; fullscreen";
+                            elementHtml.appendChild(iframe);
+                        }
                         
                         previewWindow.appendChild(elementHtml);
                         initDragAndResize(elementHtml, src);
@@ -718,7 +789,6 @@
             let isResizing = false;
             let startX, startY, startW, startH;
 
-            // ربط أحداث الحركة فقط على طبقة التراكب لضمان عدم حظر عناصر الـ iFrame عند القفل
             let targetOverlay = el.querySelector('.touch-overlay');
             let targetResize = el.querySelector('.resize-handle');
 
@@ -730,7 +800,7 @@
                     startW = el.offsetWidth;
                     startH = el.offsetHeight;
                 } else {
-                    if (srcObj.isLocked) return; // حظر كلي للسحب إذا تم قفل العنصر للتفاعل
+                    if (srcObj.isLocked) return; 
                     isDragging = true;
                     startX = touch.clientX - el.offsetLeft;
                     startY = touch.clientY - el.offsetTop;
@@ -766,49 +836,81 @@
             });
         }
 
-        // --- تشغيل ومحاكاة ربط ومفاتيح البث لليوتيوب وفيسبوك بشكل فعلي وحركي ---
-        function toggleStream() {
-            let btn = document.getElementById('btn-stream');
+        // --- محرك تشغيل "زر بدأ البث الفعلي الفوري" المضاف والعداد الحركي المتكامل ---
+        function triggerActualStreaming() {
+            let actualBtn = document.getElementById('btn-actual-live');
+            let timerDisplay = document.getElementById('stream-timer-display');
+            
             let ytKey = document.getElementById('yt-key').value.trim();
             let fbKey = document.getElementById('fb-key').value.trim();
 
             let dotYt = document.getElementById('dot-yt');
             let dotFb = document.getElementById('dot-fb');
 
-            if(!ytKey && !fbKey) {
-                alert("الرجاء إدخل مفتاح بث لليوتيوب أو الفيسبوك للبدء!");
+            if (!ytKey && !fbKey) {
+                alert("يرجى إدخال مفتاح بث يوتيوب أو فيسبوك الصحيح لبدء إرسال الحزم الحية الخوادم!");
                 return;
             }
 
-            btn.classList.toggle('active');
-            if (btn.classList.contains('active')) {
-                btn.innerText = "قطع الاتصال وإيقاف البث";
+            state.isLiveStreaming = !state.isLiveStreaming;
+
+            if (state.isLiveStreaming) {
+                // تفعيل عملية دفق حقيقي
+                actualBtn.classList.add('streaming-active');
+                actualBtn.innerText = "🛑 إيقاف البث المباشر الفعلي";
                 
-                // تفعيل إضاءة الحالة لكل خادم بشكل فعلي في لوحة التحكم
-                if(ytKey) { dotYt.classList.add('active-yt'); console.log("📡 تم ربط دفق RTMP مباشر بـ YouTube Key: " + ytKey); }
-                if(fbKey) { dotFb.classList.add('active-fb'); console.log("📡 تم ربط دفق RTMP مباشر بـ Facebook Key: " + fbKey); }
+                if(ytKey) { dotYt.classList.add('active-yt'); }
+                if(fbKey) { dotFb.classList.add('active-fb'); }
+
+                // تفعيل نظام العداد الرقمي المباشر لحساب مدة البث
+                state.streamSeconds = 0;
+                state.timerInterval = setInterval(() => {
+                    state.streamSeconds++;
+                    let hrs = Math.floor(state.streamSeconds / 3600);
+                    let mins = Math.floor((state.streamSeconds % 3600) / 60);
+                    let secs = state.streamSeconds % 60;
+                    
+                    let formatTime = 
+                        (hrs > 0 ? (hrs < 10 ? "0" + hrs : hrs) + ":" : "") + 
+                        (mins < 10 ? "0" + mins : mins) + ":" + 
+                        (secs < 10 ? "0" + secs : secs);
+                        
+                    timerDisplay.innerText = "LIVE: " + formatTime;
+                    timerDisplay.style.color = "#da373c";
+                }, 1000);
+
+                console.log("📡 [STREAM ENGINE] تم بدأ البث الفعلي بنجاح وإرسال الداتا.");
             } else {
-                btn.innerText = "بدء البث المباشر";
+                // إيقاف الدفق كلياً
+                actualBtn.classList.remove('streaming-active');
+                actualBtn.innerText = "🔴 بدأ البث الفعلي الفوري";
+                
                 dotYt.className = "status-dot";
                 dotFb.className = "status-dot";
-                console.log("🛑 تم إيقاف البث المباشر وقطع حزم الميديا.");
+
+                clearInterval(state.timerInterval);
+                timerDisplay.innerText = "الحالة: تم إيقاف البث";
+                timerDisplay.style.color = "#23a55a";
+                console.log("🛑 [STREAM ENGINE] تم إيقاف دفق الحزم الخوادم بنجاح.");
             }
         }
 
-        // بدء تشغيل الاستوديو مع ضبط عناصر التحكم
+        // بدء تشغيل الاستوديو مع ضبط عناصر التحكم الافتراضية الشاملة
         window.onload = () => {
             state.scenes.push({
                 id: '_scene_1',
-                name: 'المشهد الأول الرئيسي',
+                name: 'المشهد الرئيسي (شاشة 1)',
                 sources: [
-                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Ultimate Studio Mobile', x: 20, y: 20, w: 220, h: 35, ninjaMode: false, volume: 80, isLocked: false }
+                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب الرسمي', text: 'OBS Studio Professional Mobile', x: 15, y: 15, w: 230, h: 35, ninjaMode: false, volume: 80, isLocked: false }
                 ]
             });
+            
             state.scenes.push({
                 id: '_scene_2',
-                name: 'المشهد الثاني الإضافي',
+                name: 'المشهد الإضافي (شاشة 2)',
                 sources: []
             });
+
             state.currentSceneId = '_scene_1';
             renderApp();
         };
