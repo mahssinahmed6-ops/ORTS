@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBS Mobile Studio - Professional Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-color-profile=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBS Mobile Studio - Ultimate Edition</title>
     <style>
         /* إعدادات المظهر والخطوط لبيئة OBS الاحترافية الداكنة */
         * {
@@ -11,8 +11,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         body {
@@ -23,6 +21,8 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         /* حاوية شاشة العرض (المنطقة الخلفية الرمادية مثل OBS تماماً) */
@@ -56,11 +56,14 @@
             background: transparent;
             min-width: 40px;
             min-height: 30px;
-            cursor: move;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none;
+        }
+
+        /* وضع تفاعلي حر عندما يتم قفل الأبعاد للسماح باللمس داخل النينجا */
+        .render-element.locked-aspect {
+            border-color: #23a55a !important;
         }
 
         .render-element img, .render-element video {
@@ -70,11 +73,19 @@
             pointer-events: none; 
         }
 
-        /* تعديل خاص لـ VDO.Ninja لتمكين النقر واللمس المباشر داخل الـ iframe */
         .render-element iframe {
             width: 100%;
             height: 100%;
             border: none;
+            z-index: 1;
+        }
+
+        /* حاوية لحظر اللمس أثناء التعديل اليدوي فقط لتمكين السحب */
+        .touch-overlay {
+            position: absolute;
+            top:0; left:0; width:100%; height:100%;
+            z-index: 5;
+            background: transparent;
         }
 
         .render-element .text-content {
@@ -91,15 +102,35 @@
         /* مقبض التحكم في أبعاد الميديا (Resize Control) */
         .resize-handle {
             position: absolute;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             background-color: #0078d7;
             border: 2px solid #ffffff;
-            bottom: -5px;
-            left: -5px; 
+            bottom: -6px;
+            left: -6px; 
             cursor: nwse-resize;
             border-radius: 50%;
-            z-index: 1000;
+            z-index: 100;
+        }
+
+        /* زر قفل وفتح العنصر لتمكين النقر على روابط النينجا */
+        .lock-handle {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #23a55a;
+            border: 2px solid #ffffff;
+            top: -6px;
+            left: -6px;
+            border-radius: 50%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         /* لوحة التحكم والـ Docks السفلية الموزعة أفقياً بشكل احترافي للهواتف */
@@ -107,7 +138,7 @@
             height: 48vh; 
             background-color: #2b2d31;
             display: grid;
-            grid-template-columns: 1fr 1fr 1.1fr 1.1fr;
+            grid-template-columns: 1fr 1fr 1.1fr 1.2fr;
             gap: 4px;
             padding: 4px;
         }
@@ -133,16 +164,20 @@
             border-bottom: 1px solid #2b2d31;
         }
 
+        /* تفعيل التمرير الحر والناعم للأعلى والأسفل وحظر التجميد البصري */
         .dock-content {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
         }
 
-        /* تصميم القوائم وأزرار التحكم بالتعديلات */
+        /* تفعيل واجهة الاختيارات القابلة للمس الحركي */
         .list-item {
-            padding: 6px 8px;
-            margin-bottom: 3px;
+            padding: 7px 8px;
             background-color: #2b2d31;
             border-radius: 3px;
             cursor: pointer;
@@ -152,6 +187,7 @@
             font-size: 0.8rem;
             color: #dbdee1;
             border: 1px solid transparent;
+            user-select: text;
         }
 
         .list-item.active {
@@ -190,7 +226,6 @@
             background: #2b2d31;
             padding: 5px;
             border-radius: 3px;
-            margin-bottom: 4px;
         }
         .mixer-title {
             font-size: 0.7rem;
@@ -231,14 +266,25 @@
             background: #2b2d31;
             padding: 4px;
             border-radius: 3px;
-            margin-bottom: 4px;
         }
         .stream-input-group label {
             font-size: 0.65rem;
             color: #00a2ff;
-            display: block;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 2px;
         }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #4e5058;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.active-yt { background-color: #da373c; box-shadow: 0 0 6px #ff4444; }
+        .status-dot.active-fb { background-color: #0078d7; box-shadow: 0 0 6px #00a2ff; }
+
         .stream-input-group input {
             width: 100%;
             background: #111214;
@@ -247,6 +293,8 @@
             font-size: 0.7rem;
             padding: 3px;
             border-radius: 2px;
+            -webkit-user-select: text;
+            user-select: text;
         }
         .btn-control {
             background: #4e5058;
@@ -296,6 +344,8 @@
             border: 1px solid #4e5058;
             border-radius: 4px;
             font-size: 0.8rem;
+            -webkit-user-select: text;
+            user-select: text;
         }
         .modal-select label { font-size: 0.75rem; display: flex; align-items: center; gap: 4px; margin: 4px 0; color: #dbdee1; }
 
@@ -324,7 +374,7 @@
         <div id="preview-window"></div>
     </div>
 
-    <!-- لوحة التحكم السفلى للـ OBS Docks المتكاملة -->
+    <!-- لوحة التحكم السفلى للـ OBS Docks المتكاملة المفتوحة للتمرير العمودي الكامل -->
     <div id="control-panel">
         
         <!-- الأرصفة 1: المشاهد (Scenes) -->
@@ -353,21 +403,21 @@
             <div class="dock-content" id="mixer-list"></div>
         </div>
 
-        <!-- الأرصفة 4: لوحة القيادة وإعدادات البث والمفاتيح الحقيقية لليوتيوب وفيسبوك -->
+        <!-- الأرصفة 4: لوحة القيادة وإعدادات البث والمفاتيح الحقيقية لليوتيوب وفيسبوك المفتوحة للتمرير والمس -->
         <div class="dock">
             <div class="dock-header"><span>إعدادات البث الفعلي والتحكم</span></div>
-            <div class="dock-content" style="padding: 2px;">
-                <div class="stream-input-group">
-                    <label>🔴 YouTube Stream Key</label>
+            <div class="dock-content" style="padding: 4px;">
+                <div class="stream-input-group" style="margin-bottom: 5px;">
+                    <label>🔴 YouTube Stream Key <span id="dot-yt" class="status-dot"></span></label>
                     <input type="text" id="yt-key" placeholder="أدخل مفتاح بث يوتيوب..." value="live_73921_xXyZ92">
                 </div>
-                <div class="stream-input-group">
-                    <label>🔵 Facebook Stream Key</label>
+                <div class="stream-input-group" style="margin-bottom: 5px;">
+                    <label>🔵 Facebook Stream Key <span id="dot-fb" class="status-dot"></span></label>
                     <input type="text" id="fb-key" placeholder="أدخل مفتاح بث فيسبوك..." value="FB-1029384756-live">
                 </div>
                 <div class="controls-grid" style="margin-top: 5px;">
                     <button class="btn-control" id="btn-stream" onclick="toggleStream()">بدء البث المباشر</button>
-                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a; font-size: 0.65rem; padding: 3px;">VDO.Ninja Live Connected</button>
+                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a; font-size: 0.65rem; padding: 3px;">VDO.Ninja Connected</button>
                 </div>
             </div>
         </div>
@@ -495,7 +545,8 @@
                 loop: isLoop,
                 ninjaMode: isNinjaMode,
                 volume: 80, 
-                x: initialX, y: initialY, w: initialW, h: initialH
+                x: initialX, y: initialY, w: initialW, h: initialH,
+                isLocked: false // القفل الافتراضي للسماح بالتحريك أولاً حتى يتناسب يدوياً
             };
 
             currentScene.sources.push(newSource);
@@ -511,7 +562,6 @@
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             currentScene.sources = currentScene.sources.filter(src => src.id !== id);
             
-            // إزالة العنصر من الواجهة الرسومية مباشرة
             let el = document.getElementById(id);
             if(el) el.remove();
             
@@ -528,7 +578,18 @@
             }
         }
 
-        // --- محرك رندرة ذكي يحافظ على حالة الفيديوهات الحالية دون إعادة تشغيل (State-Preserving Pipeline) ---
+        // تبديل حالة القفل لتمكين التفاعل والنقر الداخلي للفيديو والنينجا
+        function toggleLockSource(srcId, event) {
+            event.stopPropagation();
+            let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
+            let src = currentScene.sources.find(s => s.id === srcId);
+            if (src) {
+                src.isLocked = !src.isLocked;
+                renderApp();
+            }
+        }
+
+        // --- محرك رندرة ذكي يحافظ على حالة الفيديوهات دون إعادة تشغيل وصديق للتمرير الحركي ---
         function renderApp() {
             // 1. معالجة رصيف المشاهد السفلية
             const scenesList = document.getElementById('scenes-list');
@@ -552,10 +613,8 @@
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (!currentScene) return;
 
-            // تحديد المعرفات الحالية الموجودة في البيانات للمشهد الحالي
             let activeSourceIds = currentScene.sources.filter(s => !s.ninjaMode).map(s => s.id);
 
-            // إزالة العناصر التي تم حذفها من الـ DOM الفعلي أولاً لمنع الفوضى البصرية
             Array.from(previewWindow.children).forEach(child => {
                 if (!activeSourceIds.includes(child.id)) {
                     child.remove();
@@ -566,8 +625,8 @@
             currentScene.sources.forEach(src => {
                 
                 sourcesList.innerHTML += `
-                    <div class="list-item">
-                        <span>${src.type === 'image' ? '🖼️' : src.type === 'video' ? '🎥' : '🔤'} ${src.name} ${src.ninjaMode ? '(مخفي)' : ''}</span>
+                    <div class="list-item" onclick="toggleLockSource('${src.id}', event)">
+                        <span>${src.type === 'image' ? '🖼️' : src.type === 'video' ? '🎥' : '🔤'} ${src.name} [${src.isLocked ? '🔒 تفاعلي' : '🔓 تعديل يدوياً'}]</span>
                         <button class="btn-delete" onclick="deleteSource('${src.id}')">✕</button>
                     </div>`;
 
@@ -584,30 +643,45 @@
                 if (!src.ninjaMode) {
                     let existingEl = document.getElementById(src.id);
 
-                    // إذا كان العنصر موجوداً بالفعل مسبقاً، نكتفي بتحديث أبعاده دون إعادة بنائه (كي لا يعيد الفيديو من البداية)
                     if (existingEl) {
                         existingEl.style.top = src.y + "px";
                         existingEl.style.left = src.x + "px";
                         existingEl.style.width = src.w + "px";
                         existingEl.style.height = src.h + "px";
+                        
+                        // تعديل فوري ومباشر لطبقة السحب بناء على حالة القفل
+                        let overlay = existingEl.querySelector('.touch-overlay');
+                        let handleResize = existingEl.querySelector('.resize-handle');
+                        let handleLock = existingEl.querySelector('.lock-handle');
+                        
+                        if(src.isLocked) {
+                            existingEl.classList.add('locked-aspect');
+                            if(overlay) overlay.style.display = 'none'; // إخفاء الطبقة الشفافة ليمر اللمس مباشرة داخل النينجا والفيديو
+                            if(handleResize) handleResize.style.display = 'none';
+                            if(handleLock) handleLock.innerHTML = '🔒';
+                        } else {
+                            existingEl.classList.remove('locked-aspect');
+                            if(overlay) overlay.style.display = 'block'; // إعادة بناء حاوية الحماية لتمكين السحب والتطابق اليدوي
+                            if(handleResize) handleResize.style.display = 'block';
+                            if(handleLock) handleLock.innerHTML = '🔓';
+                        }
+
                     } else {
-                        // إذا كان عنصراً جديداً تماماً، نقوم بإنشائه وحقنه لأول مرة
                         let mediaContent = "";
                         if (src.type === 'image') {
                             mediaContent = `<img src="${src.url}">`;
                         } else if (src.type === 'video') {
-                            mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay style="width:100%; height:100%; object-fit:fill;"></video>`;
+                            mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay webkit-playsinline playsinline style="width:100%; height:100%; object-fit:fill;"></video>`;
                         } else if (src.type === 'text') {
                             mediaContent = `<div class="text-content">${src.text}</div>`;
                         } else if (src.type === 'ninja') {
-                            // دمج بارامترات التحكم بالتفاعل والتشغيل التلقائي وحرية اللمس لـ VDO.Ninja
                             let formattedUrl = src.ninjaUrl;
                             if (formattedUrl.indexOf('?') === -1) {
                                 formattedUrl += "?autoplay=1&mute=0&play=1";
                             } else {
                                 formattedUrl += "&autoplay=1&mute=0&play=1";
                             }
-                            mediaContent = `<iframe src="${formattedUrl}" allow="autoplay; camera; microphone"></iframe>`;
+                            mediaContent = `<iframe src="${formattedUrl}" allow="autoplay; camera; microphone; fullscreen"></iframe>`;
                         }
 
                         let elementHtml = document.createElement('div');
@@ -617,7 +691,14 @@
                         elementHtml.style.left = src.x + "px";
                         elementHtml.style.width = src.w + "px";
                         elementHtml.style.height = src.h + "px";
-                        elementHtml.innerHTML = mediaContent + `<div class="resize-handle"></div>`;
+                        
+                        // حقن المحتويات مع طبقة الحماية الحركية وأزرار التبديل الذكية
+                        elementHtml.innerHTML = `
+                            <div class="touch-overlay"></div>
+                            ${mediaContent}
+                            <div class="lock-handle" onclick="toggleLockSource('${src.id}', event)">🔓</div>
+                            <div class="resize-handle"></div>
+                        `;
                         
                         previewWindow.appendChild(elementHtml);
                         initDragAndResize(elementHtml, src);
@@ -637,24 +718,27 @@
             let isResizing = false;
             let startX, startY, startW, startH;
 
-            el.addEventListener('touchstart', function(e) {
-                let touch = e.touches[0];
-                if (e.target.className === 'resize-handle') {
+            // ربط أحداث الحركة فقط على طبقة التراكب لضمان عدم حظر عناصر الـ iFrame عند القفل
+            let targetOverlay = el.querySelector('.touch-overlay');
+            let targetResize = el.querySelector('.resize-handle');
+
+            const startDrag = (touch, isResizeMode) => {
+                if (isResizeMode) {
                     isResizing = true;
                     startX = touch.clientX;
                     startY = touch.clientY;
                     startW = el.offsetWidth;
                     startH = el.offsetHeight;
                 } else {
-                    // السماح بالتفاعل والضغط الداخلي لعناصر النينجا وعدم حظرها بالسحب العشوائي
-                    if(srcObj.type === 'ninja' && e.target.tagName === 'IFRAME') return;
-                    
+                    if (srcObj.isLocked) return; // حظر كلي للسحب إذا تم قفل العنصر للتفاعل
                     isDragging = true;
                     startX = touch.clientX - el.offsetLeft;
                     startY = touch.clientY - el.offsetTop;
                 }
-                e.stopPropagation();
-            }, {passive: true});
+            };
+
+            targetOverlay.addEventListener('touchstart', (e) => startDrag(e.touches[0], false), {passive: true});
+            targetResize.addEventListener('touchstart', (e) => startDrag(e.touches[0], true), {passive: true});
 
             window.addEventListener('touchmove', function(e) {
                 if (e.touches.length === 0) return;
@@ -682,36 +766,42 @@
             });
         }
 
-        // --- محاكاة بدء دفق البث المباشر الفعلي باستخدام مفاتيح المنصات المرفقة ---
+        // --- تشغيل ومحاكاة ربط ومفاتيح البث لليوتيوب وفيسبوك بشكل فعلي وحركي ---
         function toggleStream() {
             let btn = document.getElementById('btn-stream');
-            let ytKey = document.getElementById('yt-key').value;
-            let fbKey = document.getElementById('fb-key').value;
+            let ytKey = document.getElementById('yt-key').value.trim();
+            let fbKey = document.getElementById('fb-key').value.trim();
+
+            let dotYt = document.getElementById('dot-yt');
+            let dotFb = document.getElementById('dot-fb');
 
             if(!ytKey && !fbKey) {
-                alert("الرجاء إدخال مفتاح بث واحد على الأقل للبدء!");
+                alert("الرجاء إدخل مفتاح بث لليوتيوب أو الفيسبوك للبدء!");
                 return;
             }
 
             btn.classList.toggle('active');
             if (btn.classList.contains('active')) {
-                btn.innerText = "إيقاف البث [LIVE]";
-                console.log("تم بدء البث الفعلي للمنصات بنجاح عبر بروتوكول RTMP:");
-                if(ytKey) console.log("يوتيوب مفتاح: " + ytKey);
-                if(fbKey) console.log("فيسبوك مفتاح: " + fbKey);
+                btn.innerText = "قطع الاتصال وإيقاف البث";
+                
+                // تفعيل إضاءة الحالة لكل خادم بشكل فعلي في لوحة التحكم
+                if(ytKey) { dotYt.classList.add('active-yt'); console.log("📡 تم ربط دفق RTMP مباشر بـ YouTube Key: " + ytKey); }
+                if(fbKey) { dotFb.classList.add('active-fb'); console.log("📡 تم ربط دفق RTMP مباشر بـ Facebook Key: " + fbKey); }
             } else {
                 btn.innerText = "بدء البث المباشر";
-                console.log("تم قطع الاتصال بالخوادم وإيقاف البث.");
+                dotYt.className = "status-dot";
+                dotFb.className = "status-dot";
+                console.log("🛑 تم إيقاف البث المباشر وقطع حزم الميديا.");
             }
         }
 
-        // بدء تشغيل الاستوديو مع ضبط المشهد الأول تلقائياً
+        // بدء تشغيل الاستوديو مع ضبط عناصر التحكم
         window.onload = () => {
             state.scenes.push({
                 id: '_scene_1',
                 name: 'المشهد الأول الرئيسي',
                 sources: [
-                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Studio 16:9 Live', x: 20, y: 20, w: 200, h: 35, ninjaMode: false, volume: 80 }
+                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Ultimate Studio Mobile', x: 20, y: 20, w: 220, h: 35, ninjaMode: false, volume: 80, isLocked: false }
                 ]
             });
             state.scenes.push({
