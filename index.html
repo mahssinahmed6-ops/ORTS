@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBS Mobile Ultimate Studio</title>
+    <title>OBS Mobile Studio - Engine Edition</title>
     <style>
-        /* التنسيق العام لـ OBS الداكن */
+        /* إعدادات المظهر والخطوط لبيئة OBS الاحترافية الداكنة */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -16,8 +16,8 @@
         }
 
         body {
-            background-color: #1a1a1a;
-            color: #f0f0f0;
+            background-color: #111214;
+            color: #afb1b6;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
@@ -25,36 +25,37 @@
             flex-direction: column;
         }
 
-        /* تنبيه لتدوير الشاشة */
-        @media screen and (orientation: portrait) {
-            #portrait-warning { display: flex !important; }
-        }
-
-        #portrait-warning {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #111; z-index: 9999; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
-        }
-
-        /* شاشة العرض الرئيسية (OBS Preview/Canvas) */
-        #preview-window {
-            flex: 1;
-            background-color: #000;
-            background-image: radial-gradient(#222 1px, transparent 1px);
-            background-size: 20px 20px;
+        /* حاوية شاشة العرض (المنطقة الخلفية الرمادية مثل OBS تماماً) */
+        #studio-viewport {
+            flex: 0.9; /* جعل شاشة العرض أصغر نسبياً مقارنة بالسابق لترك مساحة مريحة للتحكم */
+            background-color: #1e1f22;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 2px solid #2b2d31;
             position: relative;
-            border-bottom: 3px solid #2d2d2d;
-            overflow: hidden;
         }
 
-        /* حاوية العناصر الفعلية داخل الشاشة */
+        /* شاشة العرض الفعلية (Canvas/Preview) بأبعاد سينمائية مصغرة محددة */
+        #preview-window {
+            width: 85%;
+            height: 90%;
+            background-color: #000000;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0,0,0,0.9);
+            border: 1px solid #2b2d31;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        /* كائنات البث والميديا الفنية داخل الشاشة */
         .render-element {
             position: absolute;
             border: 2px solid #0078d7;
             background: transparent;
-            min-width: 60px;
-            min-height: 40px;
+            min-width: 40px;
+            min-height: 30px;
             cursor: move;
             display: flex;
             justify-content: center;
@@ -62,158 +63,238 @@
             touch-action: none;
         }
 
-        /* التحكم في محاذاة الوسائط داخل الصناديق */
         .render-element img, .render-element video {
             width: 100%;
             height: 100%;
             object-fit: fill;
-            pointer-events: none; /* منع تداخل اللمس مع تحريك العنصر */
+            pointer-events: none; /* لمنع تداخل اللمس العشوائي أثناء التكبير والسحب */
         }
 
         .render-element .text-content {
             width: 100%;
-            padding: 5px;
+            padding: 3px;
             text-align: center;
-            color: #fff;
+            color: #ffffff;
             font-weight: bold;
+            font-size: 0.9rem;
             white-space: nowrap;
             pointer-events: none;
         }
 
-        /* مقبض التحكم في الحجم (Resize Handle) */
+        /* مقبض التحكم في أبعاد الميديا (Resize Control) */
         .resize-handle {
             position: absolute;
-            width: 14px;
-            height: 14px;
-            background-color: #00a2ff;
-            border: 1px solid #fff;
+            width: 12px;
+            height: 12px;
+            background-color: #0078d7;
+            border: 1px solid #ffffff;
             bottom: -5px;
-            left: -5px; /* بما أن الاتجاه RTL، المقبض السفلي الأيسر */
+            left: -5px; /* الاتجاه متوافق مع نظام الـ RTL */
             cursor: nwse-resize;
             border-radius: 50%;
             z-index: 10;
         }
 
-        /* لوحة التحكم السفلية الموزعة (OBS Docks) */
+        /* لوحة التحكم والـ Docks السفلية الموزعة أفقياً بشكل احترافي للهواتف */
         #control-panel {
-            height: 45vh;
-            min-height: 160px;
-            background-color: #242424;
+            height: 50vh; /* زيادة المساحة لتسهيل عملية النقر بالأصابع */
+            background-color: #2b2d31;
             display: grid;
             grid-template-columns: 1fr 1fr 1.2fr 0.8fr;
-            gap: 5px;
-            padding: 5px;
+            gap: 4px;
+            padding: 4px;
         }
 
         .dock {
-            background-color: #2d2d2d;
-            border: 1px solid #3d3d3d;
-            border-radius: 4px;
+            background-color: #1e1f22;
+            border: 1px solid #2b2d31;
+            border-radius: 3px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .dock-header {
-            background-color: #1e1e1e;
-            padding: 6px 10px;
-            font-size: 0.85rem;
+            background-color: #111214;
+            padding: 5px 8px;
+            font-size: 0.8rem;
             font-weight: bold;
+            color: #dbdee1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #3d3d3d;
+            border-bottom: 1px solid #2b2d31;
         }
 
         .dock-content {
             flex: 1;
             overflow-y: auto;
-            padding: 5px;
+            padding: 4px;
         }
 
-        /* القوائم والأزرار التفاعلية */
+        /* تصميم القوائم وأزرار التحكم بالتعديلات */
         .list-item {
-            padding: 8px 10px;
-            margin-bottom: 4px;
-            background-color: #3a3a3a;
+            padding: 6px 8px;
+            margin-bottom: 3px;
+            background-color: #2b2d31;
             border-radius: 3px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            color: #dbdee1;
             border: 1px solid transparent;
         }
 
         .list-item.active {
             background-color: #0078d7;
             border-color: #00a2ff;
+            color: #ffffff;
         }
 
         .btn-add {
-            background: #444; color: #fff; border: none;
-            width: 24px; height: 24px; border-radius: 4px;
-            cursor: pointer; font-weight: bold; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center;
+            background: #4e5058;
+            color: #fff;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        .btn-add:hover { background: #6d6f78; }
         
-        .btn-delete { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 0.8rem; }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #da373c;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px;
+        }
 
-        /* مكسر الصوت المتقدم (Audio Mixer) */
+        /* مكسر الصوت الاحترافي (Audio Mixer) */
         .mixer-track {
-            background: #333;
-            padding: 6px;
-            border-radius: 4px;
-            margin-bottom: 6px;
+            background: #2b2d31;
+            padding: 5px;
+            border-radius: 3px;
+            margin-bottom: 4px;
         }
         .mixer-title {
-            font-size: 0.75rem;
-            margin-bottom: 3px;
+            font-size: 0.7rem;
+            margin-bottom: 2px;
             display: flex;
             justify-content: space-between;
+            color: #dbdee1;
         }
-        .slider-container { display: flex; align-items: center; gap: 5px; }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .volume-slider {
-            flex: 1; height: 6px; -webkit-appearance: none;
-            background: #555; border-radius: 3px; outline: none;
+            flex: 1;
+            height: 5px;
+            -webkit-appearance: none;
+            background: #4e5058;
+            border-radius: 2px;
+            outline: none;
         }
         .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 12px; height: 12px;
-            border-radius: 50%; background: #0078d7; cursor: pointer;
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0078d7;
+            cursor: pointer;
         }
 
-        /* أزرار البث والتحكم */
-        .controls-grid { display: flex; flex-direction: column; gap: 5px; height: 100%; justify-content: center; }
-        .btn-control { background: #444; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-align: center; }
-        .btn-control.active { background: #cc3333; border-color: #ff4444; }
+        /* لوحة التحكم بالبث والتسجيل */
+        .controls-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            height: 100%;
+            justify-content: center;
+        }
+        .btn-control {
+            background: #4e5058;
+            color: #ffffff;
+            border: 1px solid #2b2d31;
+            padding: 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+        }
+        .btn-control.active {
+            background: #da373c;
+            border-color: #ff4444;
+        }
 
-        /* نافذة اختيار الخصائص المخصصة والعناصر نينجا */
+        /* النافذة المنبثقة لإضافة العناصر وتخصيص الخصائص */
         .modal-select {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #2a2a2a; border: 2px solid #0078d7; padding: 20px; z-index: 10000; border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 300px;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1f22;
+            border: 1px solid #0078d7;
+            padding: 15px;
+            z-index: 10000;
+            border-radius: 6px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            width: 280px;
         }
+        .modal-select h3 { font-size: 1rem; margin-bottom: 10px; color: #fff; }
         .modal-select select, .modal-select input[type="text"] {
-            width: 100%; padding: 8px; margin: 8px 0; background: #444; color: white; border: 1px solid #555; border-radius: 4px;
+            width: 100%;
+            padding: 6px;
+            margin: 6px 0;
+            background: #2b2d31;
+            color: white;
+            border: 1px solid #4e5058;
+            border-radius: 4px;
+            font-size: 0.8rem;
         }
-        .modal-select label { font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin: 5px 0; }
+        .modal-select label { font-size: 0.75rem; display: flex; align-items: center; gap: 4px; margin: 4px 0; color: #dbdee1; }
+
+        /* تنبيه لتدوير الشاشة على الهواتف */
+        @media screen and (orientation: portrait) {
+            #portrait-warning { display: flex !important; }
+        }
+        #portrait-warning {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111214; z-index: 99999; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; color: #fff;
+        }
     </style>
 </head>
 <body>
 
-    <!-- تنبيه التدوير الأفقي -->
+    <!-- شاشة إجبار تدوير الهاتف للوضع الأفقي للتحكم المريح -->
     <div id="portrait-warning">
-        <h2>🔄 يرجى تدوير الهاتف وضعه بشكل أفقي</h2>
-        <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">لتجربة تحكم كاملة تشبه OBS Studio</p>
+        <h2>🔄 يرجى تدوير الهاتف للوضع الأفقي</h2>
+        <p style="color: #949ba4; margin-top: 10px; font-size: 0.85rem;">لتفعيل واجهة توزيع استوديو OBS الكاملة</p>
     </div>
 
-    <!-- شاشة العرض الحقيقية (الأفلام والصور والنصوص تظهر هنا) -->
-    <div id="preview-window"></div>
+    <!-- حاوية معاينة الاستوديو (مصغرة ومحاطة بإطار رمادي كما في الـ OBS) -->
+    <div id="studio-viewport">
+        <div id="preview-window"></div>
+    </div>
 
-    <!-- لوحة التحكم السفلى (Docks) -->
+    <!-- لوحة التحكم السفلى للـ OBS Docks المتكاملة -->
     <div id="control-panel">
         
-        <!-- 1. المشاهد -->
+        <!-- الأرصفة 1: المشاهد (Scenes) -->
         <div class="dock">
             <div class="dock-header">
                 <span>المشاهد (Scenes)</span>
@@ -222,7 +303,7 @@
             <div class="dock-content" id="scenes-list"></div>
         </div>
 
-        <!-- 2. العناصر -->
+        <!-- الأرصفة 2: العناصر (Sources) -->
         <div class="dock">
             <div class="dock-header">
                 <span>العناصر (Sources)</span>
@@ -231,7 +312,7 @@
             <div class="dock-content" id="sources-list"></div>
         </div>
 
-        <!-- 3. مكسر الصوت التابع للمشهد والعناصر -->
+        <!-- الأرصفة 3: مكسر الصوت الديناميكي (Audio Mixer) -->
         <div class="dock">
             <div class="dock-header">
                 <span>مكسر الصوت (Audio Mixer)</span>
@@ -239,45 +320,45 @@
             <div class="dock-content" id="mixer-list"></div>
         </div>
 
-        <!-- 4. أزرار البث والتحكم -->
+        <!-- الأرصفة 4: لوحة القيادة والبث (Controls) -->
         <div class="dock">
             <div class="dock-header"><span>التحكم</span></div>
             <div class="dock-content">
                 <div class="controls-grid">
                     <button class="btn-control" id="btn-stream" onclick="toggleStream()">بدء البث</button>
-                    <button class="btn-control" style="background: #222; color: #555;">vdo.ninja متصل</button>
+                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a;">VDO.Ninja Ready</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- نافذة إضافة عنصر ذكي وخيارات مخصصة (نص، صورة، فيديو، نينجا) -->
+    <!-- نافذة منبثقة تفاعلية لإدراج الوسائط وخيارات المعالجة -->
     <div id="source-modal" class="modal-select">
-        <h3>إضافة عنصر جديد</h3>
+        <h3>إضافة عنصر للمشهد</h3>
         <select id="source-type" onchange="toggleModalFields()">
+            <option value="video">🎥 فيديو (يدعم الأحجام الضخمة والمدد الطويلة)</option>
             <option value="image">🖼️ صورة (محلية)</option>
-            <option value="video">🎥 فيديو (محلي)</option>
             <option value="text">🔤 نص مخصص</option>
-            <option value="ninja">🥷 رابط VDO.Ninja</option>
+            <option value="ninja">🥷 رابط كاميرا VDO.Ninja</option>
         </select>
         
-        <input type="text" id="source-name-input" placeholder="اسم العنصر في القائمة">
-        <input type="text" id="source-text-val" placeholder="اكتب النص هنا" style="display:none;">
-        <input type="text" id="source-ninja-url" placeholder="رابط الـ Stream الخاص بـ Ninja" style="display:none;">
+        <input type="text" id="source-name-input" placeholder="اسم العنصر في قائمة التحكم">
+        <input type="text" id="source-text-val" placeholder="اكتب النص البديل هنا" style="display:none;">
+        <input type="text" id="source-ninja-url" placeholder="ادخل رابط البث لـ VDO.Ninja" style="display:none;">
         
-        <input type="file" id="source-file-input" accept="image/*,video/*" style="display:block; margin: 10px 0;">
+        <input type="file" id="source-file-input" accept="video/*,image/*" style="display:block; margin: 8px 0;">
 
-        <label id="loop-label"><input type="checkbox" id="source-loop"> تفعيل التكرار التلقائي (Loop)</label>
-        <label><input type="checkbox" id="source-ninja-mode"> تفعيل وضع النينجا (مخفي من البث)</label>
+        <label id="loop-label"><input type="checkbox" id="source-loop" checked> تفعيل التكرار واللوب المستمر (Loop)</label>
+        <label><input type="checkbox" id="source-ninja-mode"> تفعيل وضع النينجا (إخفاء من شاشة العرض)</label>
         
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button onclick="saveNewSource()" style="background:#0078d7; flex:1; padding:8px;">إضافة</button>
-            <button onclick="closeSourceModal()" style="background:#555; flex:1; padding:8px;">إلغاء</button>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button onclick="saveNewSource()" style="background:#0078d7; flex:1; padding:6px; color:white; border:none; border-radius:3px;">إضافة</button>
+            <button onclick="closeSourceModal()" style="background:#4e5058; flex:1; padding:6px; color:white; border:none; border-radius:3px;">إلغاء</button>
         </div>
     </div>
 
     <script>
-        // قاعدة البيانات الشاملة للتطبيق المربوطة بالمشاهد
+        // الحالة العامة للتطبيق والمخزنة تفاعلياً تبعا لكل مشهد
         let state = {
             currentSceneId: null,
             scenes: []
@@ -285,7 +366,7 @@
 
         const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
 
-        // --- إدارة المشاهد ---
+        // --- معالجة وإدارة المشاهد ---
         function addNewScene() {
             let name = prompt("أدخل اسم المشهد الجديد:");
             if (!name) return;
@@ -309,9 +390,9 @@
             renderApp();
         }
 
-        // --- التحكم بنافذة إضافة العناصر المخصصة ---
+        // --- فتح وإدارة النافذة المنبثقة للعناصر الخارقة ---
         function openSourceModal() {
-            if (!state.currentSceneId) return alert("الرجاء إضافة مشهد أولاً!");
+            if (!state.currentSceneId) return alert("الرجاء تحديد أو إضافة مشهد أولاً!");
             document.getElementById('source-modal').style.display = 'block';
             toggleModalFields();
         }
@@ -328,10 +409,10 @@
             document.getElementById('loop-label').style.display = (type === 'video') ? 'flex' : 'none';
         }
 
-        // --- حفظ ومعالجة العنصر المضاف (ملفات حقيقية) ---
+        // --- حفظ البيانات الفعيلة ودعم استنزاف الفيديوهات الطويلة جداً بالـ Blobs ---
         function saveNewSource() {
             let type = document.getElementById('source-type').value;
-            let name = document.getElementById('source-name-input').value || "عنصر غير مسمى";
+            let name = document.getElementById('source-name-input').value || ("عنصر " + type);
             let isLoop = document.getElementById('source-loop').checked;
             let isNinjaMode = document.getElementById('source-ninja-mode').checked;
             
@@ -341,7 +422,8 @@
 
             let fileUrl = "";
             if ((type === 'image' || type === 'video') && fileInput.files.length > 0) {
-                fileUrl = URL.createObjectURL(fileInput.files[0]); // استخراج مسار حقيقي للملف المرفوع
+                // استخدام دفق المسار الـ Object URL لضمان تشغيل أضخم الفيديوهات دون تحميلها بالرام
+                fileUrl = URL.createObjectURL(fileInput.files[0]); 
             }
 
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
@@ -355,15 +437,15 @@
                 ninjaUrl: ninjaUrl,
                 loop: isLoop,
                 ninjaMode: isNinjaMode,
-                volume: 80, // الصوت الافتراضي للعنصر
-                x: 50, y: 50, w: 160, h: 100 // الإحداثيات الافتراضية داخل الشاشة
+                volume: 80, 
+                x: 40, y: 30, w: 180, h: 110 // أبعاد البداية المتناسقة مع الشاشة المصغرة الجديدة
             };
 
             currentScene.sources.push(newSource);
             closeSourceModal();
             renderApp();
             
-            // تصغير وتفريغ الحقول للاستخدام القادم
+            // تنظيف الحقول للاستخدام المتكرر المريح
             document.getElementById('source-name-input').value = "";
             document.getElementById('source-text-val').value = "";
             fileInput.value = "";
@@ -385,9 +467,9 @@
             }
         }
 
-        // --- دالة التحديث والـ Rendering الشامل للشاشة والتحكم ---
+        // --- دالة التحديث ومحاكاة محرك الرندرة (OBS Render Pipeline) ---
         function renderApp() {
-            // 1. تحديث قائمة المشاهد السفلية
+            // 1. معالجة رصيف المشاهد السفلية
             const scenesList = document.getElementById('scenes-list');
             scenesList.innerHTML = '';
             state.scenes.forEach(scene => {
@@ -403,7 +485,7 @@
             const mixerList = document.getElementById('mixer-list');
             const previewWindow = document.getElementById('preview-window');
 
-            // تفريغ شاشة العرض واللوحات في حال تبديل المشهد
+            // تصفية الواجهات فور التبديل لتجنب التكرار البصري
             previewWindow.innerHTML = '';
             sourcesList.innerHTML = '';
             mixerList.innerHTML = '';
@@ -411,17 +493,17 @@
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (!currentScene) return;
 
-            // 2. تحديث قائمة العناصر والمكسر وشاشة الـ Preview لكل عنصر في هذا المشهد
+            // 2. تحديث قائمة التحكم ومسارات الصوت والميديا بداخل الشاشة المصغرة
             currentScene.sources.forEach(src => {
                 
-                // أولاً: قائمة العناصر السفلية
+                // قائمة التحكم بالعناصر
                 sourcesList.innerHTML += `
                     <div class="list-item">
                         <span>${src.type === 'image' ? '🖼️' : src.type === 'video' ? '🎥' : '🔤'} ${src.name} ${src.ninjaMode ? '(مخفي)' : ''}</span>
                         <button class="btn-delete" onclick="deleteSource('${src.id}')">✕</button>
                     </div>`;
 
-                // ثانياً: إذا كان العنصر يحتوي على صوت (فيديو أو رابط نينجا) يتم إضافته تلقائياً للمكسر
+                // دمج خطوط الصوت تلقائياً بالميكسر إذا كان العنصر يحتوي على دفق صوتي
                 if (src.type === 'video' || src.type === 'ninja') {
                     mixerList.innerHTML += `
                         <div class="mixer-track">
@@ -432,20 +514,21 @@
                         </div>`;
                 }
 
-                // ثالثاً: عرض محتوى الميديا الفعلي على الشاشة السوداء (إذا لم يكن في وضع نينجا المخفي)
+                // حقن الميديا الحقيقية وبثها في مسرح المعاينة في حال لم تكن نينجا (مخفية)
                 if (!src.ninjaMode) {
                     let mediaContent = "";
                     if (src.type === 'image') {
                         mediaContent = `<img src="${src.url}">`;
                     } else if (src.type === 'video') {
-                        mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay muted style="pointer-events:none;"></video>`;
+                        // تشغيل ميزات فك التشفير التلقائي ودعم المدد الطويلة جداً بلوب مستمر ودون تجميد
+                        mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay muted style="pointer-events:none; width:100%; height:100%; object-fit:fill;"></video>`;
                     } else if (src.type === 'text') {
                         mediaContent = `<div class="text-content">${src.text}</div>`;
                     } else if (src.type === 'ninja') {
                         mediaContent = `<iframe src="${src.ninjaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe>`;
                     }
 
-                    // توليد الكائن الحاوي القابل للسحب والتكبير بالأصابع
+                    // توليد صندوق الرندرة المرن القابل للتحريك بالأصابع وتغيير الحجم
                     let elementHtml = document.createElement('div');
                     elementHtml.className = "render-element";
                     elementHtml.id = src.id;
@@ -457,10 +540,10 @@
                     
                     previewWindow.appendChild(elementHtml);
 
-                    // تفعيل ميكانيزم السحب واللمس المتعدد لهاتف نقال (Touch & Drag Engine)
+                    // تشغيل وتفعيل أحداث اللمس المتعدد والتحجيم السريع
                     initDragAndResize(elementHtml, src);
                     
-                    // تشغيل الفيديو الفعلي وإعطاؤه قيمة الصوت المخزنة بمجرد العرض
+                    // تحويل حالة الصوت من الصمت المؤقت للأمان فور تفعيل العنصر وبدء دفق المقطع
                     if (src.type === 'video') {
                         let v = document.getElementById('video-' + src.id);
                         if (v) { v.muted = false; v.volume = src.volume / 100; }
@@ -469,13 +552,12 @@
             });
         }
 
-        // --- محرك السحب والتكبير اللمسي الخاص بالهواتف (Touch Interaction Engine) ---
+        // --- محرك الإيماءات واللمس والتعديل في البيئة المصغرة (Touch Gesture Engine) ---
         function initDragAndResize(el, srcObj) {
             let isDragging = false;
             let isResizing = false;
-            let startX, startY, startW, startH, startLeft, startTop;
+            let startX, startY, startW, startH;
 
-            // السحب أو التكبير باللمس (Mobile Touch Events)
             el.addEventListener('touchstart', function(e) {
                 let touch = e.touches[0];
                 if (e.target.className === 'resize-handle') {
@@ -505,9 +587,10 @@
                     srcObj.y = top;
                 }
                 if (isResizing) {
-                    let width = startW - (touch.clientX - startX); // العرض يتأثر بالحركة الأفقية
+                    // التحجيم العكسي بما يتطابق مع نظام العرض اليميني الأفقي للهواتف
+                    let width = startW - (touch.clientX - startX); 
                     let height = startH + (touch.clientY - startY);
-                    if (width > 50) { el.style.width = width + 'px'; srcObj.w = width; }
+                    if (width > 40) { el.style.width = width + 'px'; srcObj.w = width; }
                     if (height > 30) { el.style.height = height + 'px'; srcObj.h = height; }
                 }
             }, {passive: true});
@@ -524,13 +607,13 @@
             btn.innerText = btn.classList.contains('active') ? "إيقاف البث" : "بدء البث";
         }
 
-        // إعداد مشهد حقيقي جاهز عند الإقلاع
+        // بدء تشغيل الاستوديو وضخ مشهد أولي ترحيبي متكامل
         window.onload = () => {
             state.scenes.push({
                 id: '_scene_init',
-                name: 'المشهد الترحيبي',
+                name: 'المشهد الرئيسي رقم 1',
                 sources: [
-                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'مستودع البث الذكي OBS Mobile', x: 80, y: 30, w: 260, h: 40, ninjaMode: false, volume: 80 }
+                    { id: '_txt_welcome', type: 'text', name: 'شريط النص', text: 'استوديو البث الاحترافي المصغر OBS', x: 45, y: 35, w: 200, h: 35, ninjaMode: false, volume: 80 }
                 ]
             });
             state.currentSceneId = '_scene_init';
