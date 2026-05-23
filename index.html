@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBS Mobile Studio - Engine Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-color-profile=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBS Mobile Studio - 16:9 Edition</title>
     <style>
         /* إعدادات المظهر والخطوط لبيئة OBS الاحترافية الداكنة */
         * {
@@ -27,24 +27,24 @@
 
         /* حاوية شاشة العرض (المنطقة الخلفية الرمادية مثل OBS تماماً) */
         #studio-viewport {
-            flex: 0.9; /* جعل شاشة العرض أصغر نسبياً مقارنة بالسابق لترك مساحة مريحة للتحكم */
+            flex: 1.1; /* الحفاظ على أبعاد شاشة عرض مناسبة للمعاينة */
             background-color: #1e1f22;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 5px;
             border-bottom: 2px solid #2b2d31;
             position: relative;
         }
 
-        /* شاشة العرض الفعلية (Canvas/Preview) بأبعاد سينمائية مصغرة محددة */
+        /* شاشة العرض الفعيلة مقفلة رياضياً على أبعاد 16:9 لتبدو كالبث الحقيقي */
         #preview-window {
-            width: 85%;
-            height: 90%;
+            aspect-ratio: 16 / 9;
+            height: 95%;
             background-color: #000000;
             position: relative;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0,0,0,0.9);
-            border: 1px solid #2b2d31;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0,0,0,0.9);
+            border: 2px solid #2b2d31;
             overflow: hidden;
             border-radius: 2px;
         }
@@ -84,12 +84,12 @@
         /* مقبض التحكم في أبعاد الميديا (Resize Control) */
         .resize-handle {
             position: absolute;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             background-color: #0078d7;
             border: 1px solid #ffffff;
             bottom: -5px;
-            left: -5px; /* الاتجاه متوافق مع نظام الـ RTL */
+            left: -5px; /* الاتجاه متوافق مع نظام الـ RTL الهاتفي */
             cursor: nwse-resize;
             border-radius: 50%;
             z-index: 10;
@@ -97,7 +97,7 @@
 
         /* لوحة التحكم والـ Docks السفلية الموزعة أفقياً بشكل احترافي للهواتف */
         #control-panel {
-            height: 50vh; /* زيادة المساحة لتسهيل عملية النقر بالأصابع */
+            height: 48vh; 
             background-color: #2b2d31;
             display: grid;
             grid-template-columns: 1fr 1fr 1.2fr 0.8fr;
@@ -251,7 +251,7 @@
             z-index: 10000;
             border-radius: 6px;
             box-shadow: 0 0 20px rgba(0,0,0,0.6);
-            width: 280px;
+            width: 290px;
         }
         .modal-select h3 { font-size: 1rem; margin-bottom: 10px; color: #fff; }
         .modal-select select, .modal-select input[type="text"] {
@@ -286,7 +286,7 @@
         <p style="color: #949ba4; margin-top: 10px; font-size: 0.85rem;">لتفعيل واجهة توزيع استوديو OBS الكاملة</p>
     </div>
 
-    <!-- حاوية معاينة الاستوديو (مصغرة ومحاطة بإطار رمادي كما في الـ OBS) -->
+    <!-- حاوية معاينة الاستوديو (مصغرة ومحاطة بإطار رمادي مقفلة على أبعاد 16:9 هندسياً) -->
     <div id="studio-viewport">
         <div id="preview-window"></div>
     </div>
@@ -303,7 +303,7 @@
             <div class="dock-content" id="scenes-list"></div>
         </div>
 
-        <!-- الأرصفة 2: العناصر (Sources) -->
+        <!-- الأرصفة 2: العناصر (Sources) المربوطة والمفصولة لكل مشهد على حده -->
         <div class="dock">
             <div class="dock-header">
                 <span>العناصر (Sources)</span>
@@ -312,7 +312,7 @@
             <div class="dock-content" id="sources-list"></div>
         </div>
 
-        <!-- الأرصفة 3: مكسر الصوت الديناميكي (Audio Mixer) -->
+        <!-- الأرصفة 3: مكسر الصوت الديناميكي للمشهد النشط (Audio Mixer) -->
         <div class="dock">
             <div class="dock-header">
                 <span>مكسر الصوت (Audio Mixer)</span>
@@ -332,11 +332,11 @@
         </div>
     </div>
 
-    <!-- نافذة منبثقة تفاعلية لإدراج الوسائط وخيارات المعالجة -->
+    <!-- نافذة منبثقة تفاعلية لإدراج الوسائط وخيارات المعالجة وأبعاد الـ 16:9 التلقائية -->
     <div id="source-modal" class="modal-select">
         <h3>إضافة عنصر للمشهد</h3>
         <select id="source-type" onchange="toggleModalFields()">
-            <option value="video">🎥 فيديو (يدعم الأحجام الضخمة والمدد الطويلة)</option>
+            <option value="video">🎥 فيديو (يدعم الأحجام الضخمة والمدد الطويلة جداً)</option>
             <option value="image">🖼️ صورة (محلية)</option>
             <option value="text">🔤 نص مخصص</option>
             <option value="ninja">🥷 رابط كاميرا VDO.Ninja</option>
@@ -349,6 +349,7 @@
         <input type="file" id="source-file-input" accept="video/*,image/*" style="display:block; margin: 8px 0;">
 
         <label id="loop-label"><input type="checkbox" id="source-loop" checked> تفعيل التكرار واللوب المستمر (Loop)</label>
+        <label id="fit-label"><input type="checkbox" id="source-fit-16-9" checked> ملاءمة وتمديد الفيديو لأبعاد 16:9 تلقائياً</label>
         <label><input type="checkbox" id="source-ninja-mode"> تفعيل وضع النينجا (إخفاء من شاشة العرض)</label>
         
         <div style="display:flex; gap:8px; margin-top:12px;">
@@ -358,7 +359,7 @@
     </div>
 
     <script>
-        // الحالة العامة للتطبيق والمخزنة تفاعلياً تبعا لكل مشهد
+        // دفق البيانات الشامل والمستقل لكل مشهد على حده
         let state = {
             currentSceneId: null,
             scenes: []
@@ -366,7 +367,7 @@
 
         const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
 
-        // --- معالجة وإدارة المشاهد ---
+        // --- معالجة وإدارة المشاهد المستقلة ---
         function addNewScene() {
             let name = prompt("أدخل اسم المشهد الجديد:");
             if (!name) return;
@@ -377,6 +378,15 @@
         }
 
         function selectScene(id) {
+            // كتم الفيديوهات في المشهد الحالي قبل الانتقال للمشهد الجديد لمنع تداخل الأصوات في الخلفية
+            let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
+            if (currentScene) {
+                currentScene.sources.forEach(src => {
+                    let videoEl = document.getElementById('video-' + src.id);
+                    if (videoEl) videoEl.muted = true;
+                });
+            }
+
             state.currentSceneId = id;
             renderApp();
         }
@@ -390,7 +400,7 @@
             renderApp();
         }
 
-        // --- فتح وإدارة النافذة المنبثقة للعناصر الخارقة ---
+        // --- فتح وإدارة النافذة المنبثقة للعناصر ---
         function openSourceModal() {
             if (!state.currentSceneId) return alert("الرجاء تحديد أو إضافة مشهد أولاً!");
             document.getElementById('source-modal').style.display = 'block';
@@ -407,13 +417,15 @@
             document.getElementById('source-ninja-url').style.display = (type === 'ninja') ? 'block' : 'none';
             document.getElementById('source-file-input').style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
             document.getElementById('loop-label').style.display = (type === 'video') ? 'flex' : 'none';
+            document.getElementById('fit-label').style.display = (type === 'video' || type === 'image') ? 'flex' : 'none';
         }
 
-        // --- حفظ البيانات الفعيلة ودعم استنزاف الفيديوهات الطويلة جداً بالـ Blobs ---
+        // --- معالجة الحفظ الفعلي للميديا وملفات الفيديوهات الطويلة جداً بـ Blobs ---
         function saveNewSource() {
             let type = document.getElementById('source-type').value;
             let name = document.getElementById('source-name-input').value || ("عنصر " + type);
             let isLoop = document.getElementById('source-loop').checked;
+            let isFit169 = document.getElementById('source-fit-16-9').checked;
             let isNinjaMode = document.getElementById('source-ninja-mode').checked;
             
             let fileInput = document.getElementById('source-file-input');
@@ -422,12 +434,19 @@
 
             let fileUrl = "";
             if ((type === 'image' || type === 'video') && fileInput.files.length > 0) {
-                // استخدام دفق المسار الـ Object URL لضمان تشغيل أضخم الفيديوهات دون تحميلها بالرام
+                // دفق المسار الـ Blob URL لضمان كفاءة تشغيل أضخم الفيديوهات الطويلة دون استهلاك الرام
                 fileUrl = URL.createObjectURL(fileInput.files[0]); 
             }
 
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             
+            // حساب أبعاد ملاءمة الشاشة 16:9 تلقائياً عند الرغبة في التمدد الفوري
+            let previewWindow = document.getElementById('preview-window');
+            let initialW = isFit169 ? previewWindow.offsetWidth : 180;
+            let initialH = isFit169 ? previewWindow.offsetHeight : 110;
+            let initialX = isFit169 ? 0 : 40;
+            let initialY = isFit169 ? 0 : 30;
+
             let newSource = {
                 id: generateId(),
                 type: type,
@@ -438,7 +457,7 @@
                 loop: isLoop,
                 ninjaMode: isNinjaMode,
                 volume: 80, 
-                x: 40, y: 30, w: 180, h: 110 // أبعاد البداية المتناسقة مع الشاشة المصغرة الجديدة
+                x: initialX, y: initialY, w: initialW, h: initialH
             };
 
             currentScene.sources.push(newSource);
@@ -467,7 +486,7 @@
             }
         }
 
-        // --- دالة التحديث ومحاكاة محرك الرندرة (OBS Render Pipeline) ---
+        // --- دالة التحديث ومحاكاة محرك الرندرة وفصل المشاهد (OBS Isolation Render Pipeline) ---
         function renderApp() {
             // 1. معالجة رصيف المشاهد السفلية
             const scenesList = document.getElementById('scenes-list');
@@ -493,17 +512,17 @@
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (!currentScene) return;
 
-            // 2. تحديث قائمة التحكم ومسارات الصوت والميديا بداخل الشاشة المصغرة
+            // 2. تحديث لوحات التحكم والعروض لعناصر المشهد النشط حالياً فقط بشكل مستقل
             currentScene.sources.forEach(src => {
                 
-                // قائمة التحكم بالعناصر
+                // قائمة التحكم بالعناصر الخاصة بهذا المشهد
                 sourcesList.innerHTML += `
                     <div class="list-item">
                         <span>${src.type === 'image' ? '🖼️' : src.type === 'video' ? '🎥' : '🔤'} ${src.name} ${src.ninjaMode ? '(مخفي)' : ''}</span>
                         <button class="btn-delete" onclick="deleteSource('${src.id}')">✕</button>
                     </div>`;
 
-                // دمج خطوط الصوت تلقائياً بالميكسر إذا كان العنصر يحتوي على دفق صوتي
+                // دمج خطوط الصوت الخاصة بهذا المشهد بالميكسر تلقائياً
                 if (src.type === 'video' || src.type === 'ninja') {
                     mixerList.innerHTML += `
                         <div class="mixer-track">
@@ -514,7 +533,7 @@
                         </div>`;
                 }
 
-                // حقن الميديا الحقيقية وبثها في مسرح المعاينة في حال لم تكن نينجا (مخفية)
+                // حقن الميديا وبثها في مسرح المعاينة 16:9
                 if (!src.ninjaMode) {
                     let mediaContent = "";
                     if (src.type === 'image') {
@@ -607,16 +626,21 @@
             btn.innerText = btn.classList.contains('active') ? "إيقاف البث" : "بدء البث";
         }
 
-        // بدء تشغيل الاستوديو وضخ مشهد أولي ترحيبي متكامل
+        // بدء تشغيل الاستوديو وضخ مشهدين أوليين منفصلين للتأكد من ميزة العزل الحية فور التشغيل
         window.onload = () => {
             state.scenes.push({
-                id: '_scene_init',
-                name: 'المشهد الرئيسي رقم 1',
+                id: '_scene_1',
+                name: 'المشهد الأول 16:9',
                 sources: [
-                    { id: '_txt_welcome', type: 'text', name: 'شريط النص', text: 'استوديو البث الاحترافي المصغر OBS', x: 45, y: 35, w: 200, h: 35, ninjaMode: false, volume: 80 }
+                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Studio Mobile (مشهد 1)', x: 40, y: 35, w: 220, h: 35, ninjaMode: false, volume: 80 }
                 ]
             });
-            state.currentSceneId = '_scene_init';
+            state.scenes.push({
+                id: '_scene_2',
+                name: 'المشهد الثاني الفاضي',
+                sources: []
+            });
+            state.currentSceneId = '_scene_1';
             renderApp();
         };
     </script>
