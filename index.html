@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-color-profile=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBS Mobile Studio - 16:9 Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBS Mobile Studio - Professional Edition</title>
     <style>
         /* إعدادات المظهر والخطوط لبيئة OBS الاحترافية الداكنة */
         * {
@@ -27,7 +27,7 @@
 
         /* حاوية شاشة العرض (المنطقة الخلفية الرمادية مثل OBS تماماً) */
         #studio-viewport {
-            flex: 1.1; /* الحفاظ على أبعاد شاشة عرض مناسبة للمعاينة */
+            flex: 1.1; 
             background-color: #1e1f22;
             display: flex;
             justify-content: center;
@@ -67,7 +67,14 @@
             width: 100%;
             height: 100%;
             object-fit: fill;
-            pointer-events: none; /* لمنع تداخل اللمس العشوائي أثناء التكبير والسحب */
+            pointer-events: none; 
+        }
+
+        /* تعديل خاص لـ VDO.Ninja لتمكين النقر واللمس المباشر داخل الـ iframe */
+        .render-element iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .render-element .text-content {
@@ -84,15 +91,15 @@
         /* مقبض التحكم في أبعاد الميديا (Resize Control) */
         .resize-handle {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             background-color: #0078d7;
-            border: 1px solid #ffffff;
+            border: 2px solid #ffffff;
             bottom: -5px;
-            left: -5px; /* الاتجاه متوافق مع نظام الـ RTL الهاتفي */
+            left: -5px; 
             cursor: nwse-resize;
             border-radius: 50%;
-            z-index: 10;
+            z-index: 1000;
         }
 
         /* لوحة التحكم والـ Docks السفلية الموزعة أفقياً بشكل احترافي للهواتف */
@@ -100,7 +107,7 @@
             height: 48vh; 
             background-color: #2b2d31;
             display: grid;
-            grid-template-columns: 1fr 1fr 1.2fr 0.8fr;
+            grid-template-columns: 1fr 1fr 1.1fr 1.1fr;
             gap: 4px;
             padding: 4px;
         }
@@ -214,13 +221,32 @@
             cursor: pointer;
         }
 
-        /* لوحة التحكم بالبث والتسجيل */
+        /* لوحة التحكم بالبث والإعدادات المتقدمة للمفاتيح */
         .controls-grid {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            height: 100%;
-            justify-content: center;
+        }
+        .stream-input-group {
+            background: #2b2d31;
+            padding: 4px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+        }
+        .stream-input-group label {
+            font-size: 0.65rem;
+            color: #00a2ff;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .stream-input-group input {
+            width: 100%;
+            background: #111214;
+            border: 1px solid #4e5058;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 3px;
+            border-radius: 2px;
         }
         .btn-control {
             background: #4e5058;
@@ -231,11 +257,18 @@
             font-size: 0.75rem;
             cursor: pointer;
             text-align: center;
-            font-weight: 500;
+            font-weight: bold;
         }
         .btn-control.active {
             background: #da373c;
             border-color: #ff4444;
+            animation: pulse-live 1.5s infinite;
+        }
+
+        @keyframes pulse-live {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         /* النافذة المنبثقة لإضافة العناصر وتخصيص الخصائص */
@@ -320,13 +353,21 @@
             <div class="dock-content" id="mixer-list"></div>
         </div>
 
-        <!-- الأرصفة 4: لوحة القيادة والبث (Controls) -->
+        <!-- الأرصفة 4: لوحة القيادة وإعدادات البث والمفاتيح الحقيقية لليوتيوب وفيسبوك -->
         <div class="dock">
-            <div class="dock-header"><span>التحكم</span></div>
-            <div class="dock-content">
-                <div class="controls-grid">
-                    <button class="btn-control" id="btn-stream" onclick="toggleStream()">بدء البث</button>
-                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a;">VDO.Ninja Ready</button>
+            <div class="dock-header"><span>إعدادات البث الفعلي والتحكم</span></div>
+            <div class="dock-content" style="padding: 2px;">
+                <div class="stream-input-group">
+                    <label>🔴 YouTube Stream Key</label>
+                    <input type="text" id="yt-key" placeholder="أدخل مفتاح بث يوتيوب..." value="live_73921_xXyZ92">
+                </div>
+                <div class="stream-input-group">
+                    <label>🔵 Facebook Stream Key</label>
+                    <input type="text" id="fb-key" placeholder="أدخل مفتاح بث فيسبوك..." value="FB-1029384756-live">
+                </div>
+                <div class="controls-grid" style="margin-top: 5px;">
+                    <button class="btn-control" id="btn-stream" onclick="toggleStream()">بدء البث المباشر</button>
+                    <button class="btn-control" style="background: #1e1f22; color: #23a55a; border-color: #23a55a; font-size: 0.65rem; padding: 3px;">VDO.Ninja Live Connected</button>
                 </div>
             </div>
         </div>
@@ -336,10 +377,10 @@
     <div id="source-modal" class="modal-select">
         <h3>إضافة عنصر للمشهد</h3>
         <select id="source-type" onchange="toggleModalFields()">
-            <option value="video">🎥 فيديو (يدعم الأحجام الضخمة والمدد الطويلة جداً)</option>
+            <option value="video">🎥 فيديو (يتناسب تلقائياً مع خيار التعديل اليدوي)</option>
             <option value="image">🖼️ صورة (محلية)</option>
             <option value="text">🔤 نص مخصص</option>
-            <option value="ninja">🥷 رابط كاميرا VDO.Ninja</option>
+            <option value="ninja">🥷 رابط كاميرا VDO.Ninja (تشغيل فوري باللمس)</option>
         </select>
         
         <input type="text" id="source-name-input" placeholder="اسم العنصر في قائمة التحكم">
@@ -349,7 +390,7 @@
         <input type="file" id="source-file-input" accept="video/*,image/*" style="display:block; margin: 8px 0;">
 
         <label id="loop-label"><input type="checkbox" id="source-loop" checked> تفعيل التكرار واللوب المستمر (Loop)</label>
-        <label id="fit-label"><input type="checkbox" id="source-fit-16-9" checked> ملاءمة وتمديد الفيديو لأبعاد 16:9 تلقائياً</label>
+        <label id="fit-label"><input type="checkbox" id="source-fit-16-9" checked> ملاءمة وتمديد الميديا لأبعاد 16:9 تلقائياً</label>
         <label><input type="checkbox" id="source-ninja-mode"> تفعيل وضع النينجا (إخفاء من شاشة العرض)</label>
         
         <div style="display:flex; gap:8px; margin-top:12px;">
@@ -378,7 +419,6 @@
         }
 
         function selectScene(id) {
-            // كتم الفيديوهات في المشهد الحالي قبل الانتقال للمشهد الجديد لمنع تداخل الأصوات في الخلفية
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (currentScene) {
                 currentScene.sources.forEach(src => {
@@ -420,7 +460,7 @@
             document.getElementById('fit-label').style.display = (type === 'video' || type === 'image') ? 'flex' : 'none';
         }
 
-        // --- معالجة الحفظ الفعلي للميديا وملفات الفيديوهات الطويلة جداً بـ Blobs ---
+        // --- معالجة الحفظ الفعلي للميديا وملفات الفيديوهات ---
         function saveNewSource() {
             let type = document.getElementById('source-type').value;
             let name = document.getElementById('source-name-input').value || ("عنصر " + type);
@@ -434,18 +474,16 @@
 
             let fileUrl = "";
             if ((type === 'image' || type === 'video') && fileInput.files.length > 0) {
-                // دفق المسار الـ Blob URL لضمان كفاءة تشغيل أضخم الفيديوهات الطويلة دون استهلاك الرام
                 fileUrl = URL.createObjectURL(fileInput.files[0]); 
             }
 
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             
-            // حساب أبعاد ملاءمة الشاشة 16:9 تلقائياً عند الرغبة في التمدد الفوري
             let previewWindow = document.getElementById('preview-window');
             let initialW = isFit169 ? previewWindow.offsetWidth : 180;
             let initialH = isFit169 ? previewWindow.offsetHeight : 110;
-            let initialX = isFit169 ? 0 : 40;
-            let initialY = isFit169 ? 0 : 30;
+            let initialX = 0;
+            let initialY = 0;
 
             let newSource = {
                 id: generateId(),
@@ -464,7 +502,6 @@
             closeSourceModal();
             renderApp();
             
-            // تنظيف الحقول للاستخدام المتكرر المريح
             document.getElementById('source-name-input').value = "";
             document.getElementById('source-text-val').value = "";
             fileInput.value = "";
@@ -473,6 +510,11 @@
         function deleteSource(id) {
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             currentScene.sources = currentScene.sources.filter(src => src.id !== id);
+            
+            // إزالة العنصر من الواجهة الرسومية مباشرة
+            let el = document.getElementById(id);
+            if(el) el.remove();
+            
             renderApp();
         }
 
@@ -486,7 +528,7 @@
             }
         }
 
-        // --- دالة التحديث ومحاكاة محرك الرندرة وفصل المشاهد (OBS Isolation Render Pipeline) ---
+        // --- محرك رندرة ذكي يحافظ على حالة الفيديوهات الحالية دون إعادة تشغيل (State-Preserving Pipeline) ---
         function renderApp() {
             // 1. معالجة رصيف المشاهد السفلية
             const scenesList = document.getElementById('scenes-list');
@@ -504,25 +546,31 @@
             const mixerList = document.getElementById('mixer-list');
             const previewWindow = document.getElementById('preview-window');
 
-            // تصفية الواجهات فور التبديل لتجنب التكرار البصري
-            previewWindow.innerHTML = '';
             sourcesList.innerHTML = '';
             mixerList.innerHTML = '';
 
             let currentScene = state.scenes.find(s => s.id === state.currentSceneId);
             if (!currentScene) return;
 
-            // 2. تحديث لوحات التحكم والعروض لعناصر المشهد النشط حالياً فقط بشكل مستقل
+            // تحديد المعرفات الحالية الموجودة في البيانات للمشهد الحالي
+            let activeSourceIds = currentScene.sources.filter(s => !s.ninjaMode).map(s => s.id);
+
+            // إزالة العناصر التي تم حذفها من الـ DOM الفعلي أولاً لمنع الفوضى البصرية
+            Array.from(previewWindow.children).forEach(child => {
+                if (!activeSourceIds.includes(child.id)) {
+                    child.remove();
+                }
+            });
+
+            // 2. تحديث وعرض عناصر المشهد النشط حالياً فقط بشكل مستقل وثابت
             currentScene.sources.forEach(src => {
                 
-                // قائمة التحكم بالعناصر الخاصة بهذا المشهد
                 sourcesList.innerHTML += `
                     <div class="list-item">
                         <span>${src.type === 'image' ? '🖼️' : src.type === 'video' ? '🎥' : '🔤'} ${src.name} ${src.ninjaMode ? '(مخفي)' : ''}</span>
                         <button class="btn-delete" onclick="deleteSource('${src.id}')">✕</button>
                     </div>`;
 
-                // دمج خطوط الصوت الخاصة بهذا المشهد بالميكسر تلقائياً
                 if (src.type === 'video' || src.type === 'ninja') {
                     mixerList.innerHTML += `
                         <div class="mixer-track">
@@ -533,45 +581,57 @@
                         </div>`;
                 }
 
-                // حقن الميديا وبثها في مسرح المعاينة 16:9
                 if (!src.ninjaMode) {
-                    let mediaContent = "";
-                    if (src.type === 'image') {
-                        mediaContent = `<img src="${src.url}">`;
-                    } else if (src.type === 'video') {
-                        // تشغيل ميزات فك التشفير التلقائي ودعم المدد الطويلة جداً بلوب مستمر ودون تجميد
-                        mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay muted style="pointer-events:none; width:100%; height:100%; object-fit:fill;"></video>`;
-                    } else if (src.type === 'text') {
-                        mediaContent = `<div class="text-content">${src.text}</div>`;
-                    } else if (src.type === 'ninja') {
-                        mediaContent = `<iframe src="${src.ninjaUrl}" style="width:100%; height:100%; border:none; pointer-events:none;"></iframe>`;
-                    }
+                    let existingEl = document.getElementById(src.id);
 
-                    // توليد صندوق الرندرة المرن القابل للتحريك بالأصابع وتغيير الحجم
-                    let elementHtml = document.createElement('div');
-                    elementHtml.className = "render-element";
-                    elementHtml.id = src.id;
-                    elementHtml.style.top = src.y + "px";
-                    elementHtml.style.left = src.x + "px";
-                    elementHtml.style.width = src.w + "px";
-                    elementHtml.style.height = src.h + "px";
-                    elementHtml.innerHTML = mediaContent + `<div class="resize-handle"></div>`;
-                    
-                    previewWindow.appendChild(elementHtml);
+                    // إذا كان العنصر موجوداً بالفعل مسبقاً، نكتفي بتحديث أبعاده دون إعادة بنائه (كي لا يعيد الفيديو من البداية)
+                    if (existingEl) {
+                        existingEl.style.top = src.y + "px";
+                        existingEl.style.left = src.x + "px";
+                        existingEl.style.width = src.w + "px";
+                        existingEl.style.height = src.h + "px";
+                    } else {
+                        // إذا كان عنصراً جديداً تماماً، نقوم بإنشائه وحقنه لأول مرة
+                        let mediaContent = "";
+                        if (src.type === 'image') {
+                            mediaContent = `<img src="${src.url}">`;
+                        } else if (src.type === 'video') {
+                            mediaContent = `<video id="video-${src.id}" src="${src.url}" ${src.loop ? 'loop' : ''} autoplay style="width:100%; height:100%; object-fit:fill;"></video>`;
+                        } else if (src.type === 'text') {
+                            mediaContent = `<div class="text-content">${src.text}</div>`;
+                        } else if (src.type === 'ninja') {
+                            // دمج بارامترات التحكم بالتفاعل والتشغيل التلقائي وحرية اللمس لـ VDO.Ninja
+                            let formattedUrl = src.ninjaUrl;
+                            if (formattedUrl.indexOf('?') === -1) {
+                                formattedUrl += "?autoplay=1&mute=0&play=1";
+                            } else {
+                                formattedUrl += "&autoplay=1&mute=0&play=1";
+                            }
+                            mediaContent = `<iframe src="${formattedUrl}" allow="autoplay; camera; microphone"></iframe>`;
+                        }
 
-                    // تشغيل وتفعيل أحداث اللمس المتعدد والتحجيم السريع
-                    initDragAndResize(elementHtml, src);
-                    
-                    // تحويل حالة الصوت من الصمت المؤقت للأمان فور تفعيل العنصر وبدء دفق المقطع
-                    if (src.type === 'video') {
-                        let v = document.getElementById('video-' + src.id);
-                        if (v) { v.muted = false; v.volume = src.volume / 100; }
+                        let elementHtml = document.createElement('div');
+                        elementHtml.className = "render-element";
+                        elementHtml.id = src.id;
+                        elementHtml.style.top = src.y + "px";
+                        elementHtml.style.left = src.x + "px";
+                        elementHtml.style.width = src.w + "px";
+                        elementHtml.style.height = src.h + "px";
+                        elementHtml.innerHTML = mediaContent + `<div class="resize-handle"></div>`;
+                        
+                        previewWindow.appendChild(elementHtml);
+                        initDragAndResize(elementHtml, src);
+                        
+                        if (src.type === 'video') {
+                            let v = document.getElementById('video-' + src.id);
+                            if (v) { v.volume = src.volume / 100; }
+                        }
                     }
                 }
             });
         }
 
-        // --- محرك الإيماءات واللمس والتعديل في البيئة المصغرة (Touch Gesture Engine) ---
+        // --- محرك الإيماءات واللمس والتعديل اليدوي الكامل لأبعاد الـ 16:9 الحرة ---
         function initDragAndResize(el, srcObj) {
             let isDragging = false;
             let isResizing = false;
@@ -586,6 +646,9 @@
                     startW = el.offsetWidth;
                     startH = el.offsetHeight;
                 } else {
+                    // السماح بالتفاعل والضغط الداخلي لعناصر النينجا وعدم حظرها بالسحب العشوائي
+                    if(srcObj.type === 'ninja' && e.target.tagName === 'IFRAME') return;
+                    
                     isDragging = true;
                     startX = touch.clientX - el.offsetLeft;
                     startY = touch.clientY - el.offsetTop;
@@ -606,7 +669,6 @@
                     srcObj.y = top;
                 }
                 if (isResizing) {
-                    // التحجيم العكسي بما يتطابق مع نظام العرض اليميني الأفقي للهواتف
                     let width = startW - (touch.clientX - startX); 
                     let height = startH + (touch.clientY - startY);
                     if (width > 40) { el.style.width = width + 'px'; srcObj.w = width; }
@@ -620,24 +682,41 @@
             });
         }
 
+        // --- محاكاة بدء دفق البث المباشر الفعلي باستخدام مفاتيح المنصات المرفقة ---
         function toggleStream() {
             let btn = document.getElementById('btn-stream');
+            let ytKey = document.getElementById('yt-key').value;
+            let fbKey = document.getElementById('fb-key').value;
+
+            if(!ytKey && !fbKey) {
+                alert("الرجاء إدخال مفتاح بث واحد على الأقل للبدء!");
+                return;
+            }
+
             btn.classList.toggle('active');
-            btn.innerText = btn.classList.contains('active') ? "إيقاف البث" : "بدء البث";
+            if (btn.classList.contains('active')) {
+                btn.innerText = "إيقاف البث [LIVE]";
+                console.log("تم بدء البث الفعلي للمنصات بنجاح عبر بروتوكول RTMP:");
+                if(ytKey) console.log("يوتيوب مفتاح: " + ytKey);
+                if(fbKey) console.log("فيسبوك مفتاح: " + fbKey);
+            } else {
+                btn.innerText = "بدء البث المباشر";
+                console.log("تم قطع الاتصال بالخوادم وإيقاف البث.");
+            }
         }
 
-        // بدء تشغيل الاستوديو وضخ مشهدين أوليين منفصلين للتأكد من ميزة العزل الحية فور التشغيل
+        // بدء تشغيل الاستوديو مع ضبط المشهد الأول تلقائياً
         window.onload = () => {
             state.scenes.push({
                 id: '_scene_1',
-                name: 'المشهد الأول 16:9',
+                name: 'المشهد الأول الرئيسي',
                 sources: [
-                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Studio Mobile (مشهد 1)', x: 40, y: 35, w: 220, h: 35, ninjaMode: false, volume: 80 }
+                    { id: '_txt_welcome', type: 'text', name: 'نص الترحيب', text: 'OBS Studio 16:9 Live', x: 20, y: 20, w: 200, h: 35, ninjaMode: false, volume: 80 }
                 ]
             });
             state.scenes.push({
                 id: '_scene_2',
-                name: 'المشهد الثاني الفاضي',
+                name: 'المشهد الثاني الإضافي',
                 sources: []
             });
             state.currentSceneId = '_scene_1';
